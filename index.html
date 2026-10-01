@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<!-- CSP: บังคับในระดับเบราว์เซอร์ว่าห้ามโหลดหรือส่งอะไรออกนอกโปรเจกต์ -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<!-- ชื่อแท็บต้องเป็น "Sa Bai Jai" เสมอ ห้ามแก้ด้วยโค้ด -->
+<title>Sa Bai Jai</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<button id="btn-exit" class="float-btn" type="button" aria-label="ออกทันที ล้างหน้าจอและไปหน้าว่าง">ออกทันที</button>
+
+<main id="app">
+
+  <!-- Onboarding -->
+  <section id="view-onboarding" class="view" hidden>
+    <p id="ob-step" class="muted"></p>
+    <h1 id="ob-title" tabindex="-1"></h1>
+    <p id="ob-text" class="lead"></p>
+    <div class="row">
+      <button id="ob-skip" class="btn secondary" type="button">ข้าม</button>
+      <button id="ob-next" class="btn primary" type="button">ถัดไป</button>
+    </div>
+  </section>
+
+  <!-- ล็อกด้วย PIN -->
+  <section id="view-lock" class="view" hidden>
+    <h1 tabindex="-1">ใส่ PIN เพื่อเปิด</h1>
+    <label for="lock-pin" class="sr-only">PIN 4 หลัก</label>
+    <input id="lock-pin" class="text-input" type="password" inputmode="numeric" maxlength="4" autocomplete="off" aria-describedby="lock-msg">
+    <p id="lock-msg" role="status" class="muted"></p>
+    <div class="row">
+      <button id="lock-go" class="btn primary" type="button">เปิด</button>
+    </div>
+  </section>
+
+  <!-- Quick Tap -->
+  <section id="view-quick" class="view" hidden>
+    <h1 id="greet" tabindex="-1"></h1>
+    <p id="greet-sub" class="lead">ตอนนี้รู้สึกอย่างไรบ้าง</p>
+
+    <h2>ความรู้สึกตอนนี้อยู่ตรงไหน</h2>
+    <div class="mood-wrap">
+      <div class="lbl lbl-top">พลังงานสูง</div>
+      <div class="lbl lbl-left">ไม่ดี</div>
+      <div id="mood-map" tabindex="0" role="group"
+           aria-label="แผนที่อารมณ์ แกนนอนคือไม่ดีถึงดี แกนตั้งคือพลังงานต่ำถึงสูง แตะเพื่อเลือกจุด หรือใช้ปุ่มลูกศร"></div>
+      <div class="lbl lbl-right">ดี</div>
+      <div class="lbl lbl-bottom">พลังงานต่ำ</div>
+    </div>
+    <p id="mood-caption" class="muted center" aria-live="polite">แตะบนแผนที่เพื่อเลือกจุด</p>
+
+    <h2><label for="stress">ความเครียดตอนนี้</label></h2>
+    <input id="stress" type="range" min="0" max="10" step="1" value="5" aria-describedby="stress-val">
+    <div class="range-labels"><span>0 ไม่เครียด</span><span>10 เครียดที่สุด</span></div>
+    <p id="stress-val" class="center" aria-live="polite">ยังไม่ได้เลือก</p>
+
+    <p id="quick-msg" role="status" class="center"></p>
+    <div class="row">
+      <button id="quick-unsure" class="btn secondary" type="button">ยังบอกไม่ได้</button>
+      <button id="quick-next" class="btn primary" type="button">ถัดไป</button>
+    </div>
+  </section>
+
+  <!-- Daily Core -->
+  <section id="view-core" class="view" hidden>
+    <h1 tabindex="-1">ข้อมูลประกอบ</h1>
+    <p class="muted">ประมาณก็พอ ข้อมูลหยาบก็ใช้ได้ ข้ามได้ทุกข้อ</p>
+
+    <h2 id="lbl-sleep">เมื่อคืนนอนประมาณ (ชั่วโมง)</h2>
+    <div id="grp-sleep" class="chips" data-key="sleep" role="group" aria-labelledby="lbl-sleep"></div>
+
+    <h2 id="lbl-study">วันนี้เรียน/ทำการบ้านประมาณ (ชั่วโมง)</h2>
+    <div id="grp-study" class="chips" data-key="study" role="group" aria-labelledby="lbl-study"></div>
+
+    <h2 id="lbl-tags">วันนี้มีอะไรบ้าง (เลือกได้หลายข้อ)</h2>
+    <div id="grp-tags" class="chips" data-key="tags" role="group" aria-labelledby="lbl-tags"></div>
+
+    <div class="row">
+      <button id="core-skip" class="btn secondary" type="button">ข้ามวันนี้</button>
+      <button id="core-next" class="btn primary" type="button">ถัดไป</button>
+    </div>
+  </section>
+
+  <!-- หน้าจบ -->
+  <section id="view-done" class="view" hidden>
+    <h1 id="done-title" tabindex="-1"></h1>
+    <div id="yellow-card" class="card" hidden>
+      <p>ช่วงนี้ดูหนักอยู่นะ ไม่ต้องทำอะไรเพิ่มก็ได้ แต่ถ้าอยากมีคนคุยด้วย เมนูช่วยเหลืออยู่ตรงนี้เสมอ</p>
+      <div class="row stack">
+        <button id="yellow-help" class="btn primary" type="button">เปิดเมนูช่วยเหลือ</button>
+        <button id="yellow-ok" class="btn secondary" type="button">ไม่เป็นไร ขอบคุณ</button>
+      </div>
+    </div>
+    <div class="row">
+      <button id="done-chart" class="btn secondary" type="button">ดูกราฟของฉัน</button>
+      <button id="done-ok" class="btn primary" type="button">เสร็จ</button>
+    </div>
+  </section>
+
+  <!-- กราฟ -->
+  <section id="view-chart" class="view" hidden>
+    <h1 tabindex="-1">กราฟของฉัน</h1>
+    <p class="muted">ไว้ดูรูปแบบคร่าว ๆ เท่านั้น ไม่ได้บอกว่าดีหรือไม่ดี</p>
+    <div class="row ranges" role="group" aria-label="เลือกช่วงเวลา">
+      <button class="btn secondary range-btn" type="button" data-range="7" aria-pressed="true">7 วัน</button>
+      <button class="btn secondary range-btn" type="button" data-range="30" aria-pressed="false">30 วัน</button>
+      <button class="btn secondary range-btn" type="button" data-range="all" aria-pressed="false">ทั้งหมด</button>
+    </div>
+    <svg id="chart-svg" viewBox="0 0 360 230" role="group" aria-label="กราฟเส้นความเครียดรายวัน"></svg>
+    <p id="chart-readout" class="center" aria-live="polite"></p>
+    <p id="chart-n" class="center"></p>
+    <p id="chart-warn" class="muted center"></p>
+  </section>
+
+  <!-- ตั้งค่า -->
+  <section id="view-settings" class="view" hidden>
+    <h1 tabindex="-1">ตั้งค่า</h1>
+
+    <h2>ข้อมูลของคุณอยู่ที่ไหน</h2>
+    <p>ข้อมูลทั้งหมดอยู่ในเครื่องของคุณเท่านั้น ไม่มีใครเห็น และแอปนี้ไม่ได้เฝ้าดูหรือแจ้งใคร ถ้าล้างเบราว์เซอร์หรือเปลี่ยนเครื่อง ข้อมูลจะหาย แนะนำให้กด “ส่งออกข้อมูล” เก็บไว้เป็นระยะ</p>
+
+    <h2>สำรองข้อมูล</h2>
+    <div class="row stack">
+      <button id="set-export" class="btn secondary" type="button">ส่งออกข้อมูล</button>
+      <button id="set-import" class="btn secondary" type="button">นำเข้าข้อมูล</button>
+    </div>
+    <input id="import-file" type="file" accept="application/json,.json" hidden>
+
+    <h2>PIN ล็อก</h2>
+    <div id="pin-box"></div>
+
+    <h2>ลบข้อมูล</h2>
+    <div class="row stack">
+      <button id="set-delete" class="btn secondary" type="button">ลบข้อมูลทั้งหมด</button>
+    </div>
+
+    <p id="settings-msg" role="status" class="center"></p>
+  </section>
+
+</main>
+
+<nav id="nav" hidden aria-label="เมนูหลัก">
+  <button type="button" data-go="quick">บันทึก</button>
+  <button type="button" data-go="chart">กราฟ</button>
+  <button type="button" data-go="settings">ตั้งค่า</button>
+</nav>
+
+<button id="btn-help" class="float-btn" type="button" aria-haspopup="dialog">ขอความช่วยเหลือ</button>
+
+<div id="overlay" hidden>
+  <div id="dialog" role="dialog" aria-modal="true" tabindex="-1"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="db.js"></script>
+<script src="chart.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
